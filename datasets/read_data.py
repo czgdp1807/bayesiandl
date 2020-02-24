@@ -5,7 +5,14 @@ import numpy as np
 def one_hot(a, num_classes):
   return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
 
-def read_idx(filename, flatten=True, normalize=True, show_logs=True, num_data=1000000, to_one_hot=False):
+def read_idx(filename, flatten=True, normalize=True, show_logs=True,
+             num_data=1000000, to_one_hot=False,
+             cache_result=False, use_cache=False):
+    if use_cache:
+        filename = filename + "_cache.npy"
+        ret_val = np.load(filename)
+        print("Loaded cached data from %s"%(filename))
+        return ret_val
     with open(filename, 'rb') as f:
         zero, data_type, dims = struct.unpack('>HBB', f.read(4))
         shape = tuple(struct.unpack('>I', f.read(4))[0] for d in range(dims))
@@ -34,5 +41,8 @@ def read_idx(filename, flatten=True, normalize=True, show_logs=True, num_data=10
             ret_val = np.asarray(flatten_val)
         del flatten_val
         if to_one_hot:
-            ret_val = one_hot(ret_val, 10)
+            ret_val = one_hot(ret_val[0:num_data], 10)
+        if cache_result:
+            np.save(filename+"_cache", ret_val)
+            print("Saved cached data to %s_cache"%(filename))
         return ret_val
