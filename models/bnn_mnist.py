@@ -54,8 +54,8 @@ class BNNLayer_Normal_Normal(BNNLayer):
                                          tf.math.add(tf.constant(1., shape=eps_b_shape),
                                          tf.math.exp(self.bias_rho))))
 
-        self._weights.assign(tf.math.add(self.kernel_mu, term_w))
-        self._bias.assign(tf.math.add(self.bias_mu, term_b))
+        self._weights.assign(tf.math.add(self.kernel_mu, term_w), use_locking=True)
+        self._bias.assign(tf.math.add(self.bias_mu, term_b), use_locking=True)
         self._eps_w, self._eps_b = eps_w, eps_b
 
 class BNN_Normal_Normal(tf.keras.Model):
@@ -112,10 +112,10 @@ class BNN_Normal_Normal(tf.keras.Model):
         eps_w, eps_b = self.Dense_2._eps_w, self.Dense_2._eps_b
         weights_2 = self.Dense_2._weights
         pw += tf.math.reduce_sum(tf.math.log(self.prior(weights_2, 0.5, 0.01, 0.001)))
-        qw += tf.math.reduce_sum(tf.math.add(qw, tf.math.log(self.posterior(weights_2, kernel_mu, kernel_rho, eps_w))))
+        qw += tf.math.reduce_sum(tf.math.log(self.posterior(weights_2, kernel_mu, kernel_rho, eps_w)))
         b_2 = self.Dense_2._bias
-        pb += tf.math.reduce_sum(tf.math.add(pb, tf.math.log(self.prior(b_2, 0.5, 0.01, 0.001))))
-        qb += tf.math.reduce_sum(tf.math.add(qb, tf.math.log(self.posterior(b_2, bias_mu, bias_rho, eps_b))))
+        pb += tf.math.reduce_sum(tf.math.log(self.prior(b_2, 0.5, 0.01, 0.001)))
+        qb += tf.math.reduce_sum(tf.math.log(self.posterior(b_2, bias_mu, bias_rho, eps_b)))
 
         kernel_mu, kernel_rho = self.Output.kernel_mu, self.Output.kernel_rho
         bias_mu, bias_rho = self.Output.bias_mu, self.Output.bias_rho
