@@ -4,7 +4,7 @@ Bayesian Deep Learning
 About Us
 --------
 
-We, Gagandeep Singh(B17CS021) and Kunal Jangid(B17CS030) are computer science students of IIT Jodhpur pursing their B.Tech Project under Dr. Deepak Mishra.
+We are computer science students of IIT Jodhpur pursing their B.Tech Project under Dr. Deepak Mishra.
 
 Technologies
 ------------
