@@ -3,7 +3,7 @@ import struct
 import numpy as np
 
 def one_hot(a, num_classes):
-  return np.squeeze(np.eye(num_classes)[a.reshape(-1)])
+  return np.squeeze(np.eye(num_classes, dtype=np.float64)[a.reshape(-1)])
 
 def read_idx(filename, flatten=True, normalize=True, show_logs=True,
              num_data=1000000, to_one_hot=False,
@@ -30,7 +30,7 @@ def read_idx(filename, flatten=True, normalize=True, show_logs=True,
                         mat[j][k] = ret_val[i][j][k]/255.
                 normalize_val.append(mat)
                 del mat
-            ret_val = np.asarray(normalize_val)
+            ret_val = np.asarray(normalize_val, dtype=np.float64)
         del normalize_val
         flatten_val = []
         if flatten:
@@ -38,7 +38,7 @@ def read_idx(filename, flatten=True, normalize=True, show_logs=True,
                 if show_logs:
                     print("Flattened %s-th data"%(i+1))
                 flatten_val.append(ret_val[i].flatten('C'))
-            ret_val = np.asarray(flatten_val)
+            ret_val = np.asarray(flatten_val, dtype=np.float64)
         del flatten_val
         if to_one_hot:
             ret_val = one_hot(ret_val[0:num_data], 10)
