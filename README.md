@@ -17,6 +17,4 @@ We are using the following technologies in our project,
 References
 ----------
 
-.. [1] Weight Uncertainty in Neural Networks
-       In Proceedings of the 32nd International Conference on Machine Learning
-       [arXiv:1505.05424v2](https://arxiv.org/abs/1505.05424v2)
+Charles Blundell, Julien Cornebise, Koray Kavukcuoglu, and Daan Wierstra, *Weight Uncertainty in Neural Networks*, In Proceedings of the 32nd International Conference on Machine Learning, [arXiv:1505.05424v2](https://arxiv.org/abs/1505.05424v2)
