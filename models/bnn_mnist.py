@@ -4,6 +4,19 @@ from tensorflow.keras.activations import relu as Relu, softmax as Softmax
 import math
 
 class BNNLayer(tf.keras.layers.Layer):
+    """
+    Base class for BNN layers.
+
+    Parameters
+    ==========
+
+    num_inputs: int
+        Number of inputs to the layer.
+    num_outputs: int
+        Number of outputs from the layer.
+    activation:
+        Activation from tensorflow.keras.activations.
+    """
 
     def __init__(self, num_inputs, num_outputs, activation):
         super(BNNLayer, self).__init__(dtype=tf.float32)
@@ -21,12 +34,20 @@ class BNNLayer(tf.keras.layers.Layer):
                                             dtype=tf.float32)
 
     def _reparametrize(self):
+        """
+        Abstract method which implements the
+        reparametrisation technique.
+        """
         return None
 
     def call(self, input, weights):
         return self.activation(tf.matmul(input, weights))
 
 class BNNLayer_Normal_Normal(BNNLayer):
+    """
+    BNN layer which implements reparametrisation
+    trick from N(0, 1) to any N(mu, sigma).
+    """
 
     def _reparametrize(self):
         eps_w_shape = self.kernel_mu.shape
@@ -37,6 +58,10 @@ class BNNLayer_Normal_Normal(BNNLayer):
         return tf.math.add(self.kernel_mu, term_w)
 
 class BNN_Normal_Normal(tf.keras.Model):
+    """
+    BNN model which uses BNN_Layer_Normal_Normal
+    stacks of layers.
+    """
 
     def __init__(self, input_shape=None):
         super(BNN_Normal_Normal, self).__init__()
@@ -52,6 +77,17 @@ class BNN_Normal_Normal(tf.keras.Model):
         return self.Output(layer_output_3, weights[2])
 
     def log_prior(self, weights):
+        """
+        Computes the natural logarithm of scale
+        mixture prior of weights.
+
+        Note
+        ====
+
+        The two standard deviations of the scale mixture are,
+        exp(-1) and exp(-2). The weight of both normal distributions
+        is 0.5.
+        """
         shape = weights.shape
         sigma_1 = tf.constant(math.exp(-1), shape=shape, dtype=tf.float32)
         sigma_2 = tf.constant(math.exp(-6), shape=shape, dtype=tf.float32)
@@ -62,6 +98,10 @@ class BNN_Normal_Normal(tf.keras.Model):
         return tf.math.reduce_sum(tf.math.log(part_1 + part_2))
 
     def log_posterior(self, weights, mu, rho):
+        """
+        Computes the natural logarithm of Gaussian
+        posterior on weights.
+        """
         sigma = tf.math.log(1 + tf.math.exp(rho))
         pdf = lambda w, mu, sigma: ((tf.math.exp(-0.5*(tf.math.square(w - mu))/(tf.math.square(sigma))))/
                                     (tf.math.sqrt(2*math.pi)*tf.math.abs(sigma)))
@@ -69,6 +109,19 @@ class BNN_Normal_Normal(tf.keras.Model):
         return tf.math.reduce_sum(log_q)
 
     def get_loss(self, inputs, targets, samples, weight=1.):
+        """
+        Computes the total training loss.
+
+        Parameters
+        ==========
+
+        inputs
+            Input to the layers.
+        targets
+            True targets that the model wants to learn from.
+        weight
+            Weight given to loss of each batch. By default, 1.
+        """
         loss = tf.constant(0., dtype=tf.float32)
         for _ in range(samples):
             weights_1 = self.Dense_1._reparametrize()
