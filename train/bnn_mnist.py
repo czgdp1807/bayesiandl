@@ -2,6 +2,7 @@ from models.bnn_mnist import BNN_Normal_Normal
 from datasets.read_data import read_idx
 import numpy as np
 import tensorflow as tf
+from datetime import date
 
 def random_shuffle(x, y):
     indices = np.arange(x.shape[0])
@@ -29,4 +30,6 @@ def train(input_data_path, target_data_path, weight_file, batch_size=1, epochs=1
             model.learn(input_sub, target_sub, 1/(size//batch_size))
         print("Loss at completion of epoch %s is %s"%(epoch, model.get_loss(inputs, targets, 10)))
         print("Cross entropy at completion of epoch %s is %s"%(epoch,model.get_loss(inputs, targets, 1, 1., True)))
-    model.save_weights("./weights/" + weight_file)
+        if epoch%2 == 0:
+            model.save_weights("./weights/mnist/" +
+             date.today().strftime("%d_%m_%Y"))
