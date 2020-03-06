@@ -30,7 +30,7 @@ class BNNLayer(tf.keras.layers.Layer):
         self.kernel_rho = self.add_variable("kernel_sigma",
                                             shape=[num_inputs,
                                                    self.num_outputs],
-                                            initializer=tf.keras.initializers.constant(0.01),
+                                            initializer=tf.keras.initializers.TruncatedNormal(),
                                             dtype=tf.float32)
 
     def _reparametrize(self):
