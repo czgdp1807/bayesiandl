@@ -65,7 +65,8 @@ class BNN_Normal_Normal(tf.keras.Model):
 
     def __init__(self, input_shape=None):
         super(BNN_Normal_Normal, self).__init__()
-        self.InputLayer = tf.keras.layers.InputLayer(input_shape=input_shape, dtype=tf.float32)
+        self.InputLayer = tf.keras.layers.InputLayer(input_shape=(input_shape[1],),
+                            batch_size=input_shape[0], dtype=tf.float32)
         self.Dense_1 = BNNLayer_Normal_Normal(int(input_shape[-1]), 200, activation=Relu)
         self.Dense_2 = BNNLayer_Normal_Normal(200, 200, activation=Relu)
         self.Output = BNNLayer_Normal_Normal(200, 10, activation=Softmax)
@@ -74,7 +75,8 @@ class BNN_Normal_Normal(tf.keras.Model):
         layer_output_1 = self.InputLayer(inputs)
         layer_output_2 = self.Dense_1(layer_output_1, weights[0])
         layer_output_3 = self.Dense_2(layer_output_2, weights[1])
-        return self.Output(layer_output_3, weights[2])
+        output = self.Output(layer_output_3, weights[2])
+        return output
 
     def log_prior(self, weights):
         """
@@ -108,7 +110,7 @@ class BNN_Normal_Normal(tf.keras.Model):
         log_q = tf.math.log(tf.clip_by_value(pdf(weights, mu, sigma), 1e-10, 1.))
         return tf.math.reduce_sum(log_q)
 
-    def get_loss(self, inputs, targets, samples, weight=1.):
+    def get_loss(self, inputs, targets, samples, weight=1., inference=False):
         """
         Computes the total training loss.
 
@@ -123,6 +125,7 @@ class BNN_Normal_Normal(tf.keras.Model):
             Weight given to loss of each batch. By default, 1.
         """
         loss = tf.constant(0., dtype=tf.float32)
+        outputs_list = []
         for _ in range(samples):
             weights_1 = self.Dense_1._reparametrize()
             kernel_mu, kernel_rho = self.Dense_1.kernel_mu, self.Dense_1.kernel_rho
@@ -140,9 +143,15 @@ class BNN_Normal_Normal(tf.keras.Model):
             qw += self.log_posterior(weights_3, kernel_mu, kernel_rho)
 
             outputs = self.run(inputs, weights_1, weights_2, weights_3)
-            cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=outputs, labels=targets))
-            loss += (qw - pw)*weight + cross_entropy
+            outputs_list.append(outputs)
+            cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=outputs, labels=targets))
+            if inference:
+                loss += cross_entropy
+            else:
+                loss += (qw - pw)*weight + cross_entropy
 
+        if inference:
+            return outputs_list, loss/samples
         return loss/samples
 
     def compute_gradients(self, inputs, targets, weight):
