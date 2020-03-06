@@ -26,8 +26,7 @@ batch_size = int(sys.argv[3])
 epochs = int(sys.argv[4])
 cache_result = bool(int(sys.argv[5]))
 use_cache = bool(int(sys.argv[6]))
-weight_file = sys.argv[7]
-dataset_size = int(sys.argv[8])
+dataset_size = int(sys.argv[7])
 
-train(input_data_path, output_data_path, weight_file,
-      batch_size, dataset_size, epochs, cache_result, use_cache)
+train(input_data_path, output_data_path, batch_size,
+      dataset_size, epochs, cache_result, use_cache)
