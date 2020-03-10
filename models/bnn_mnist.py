@@ -41,7 +41,8 @@ class BNNLayer(tf.keras.layers.Layer):
         return None
 
     def call(self, input, weights):
-        return self.activation(tf.matmul(input, weights))
+        prod = self.activation(tf.matmul(input, weights))
+        return tf.clip_by_value(prod, 1e-6, 1.)
 
 class BNNLayer_Normal_Normal(BNNLayer):
     """
@@ -141,6 +142,8 @@ class BNN_Normal_Normal(tf.keras.Model):
             kernel_mu, kernel_rho = self.Output.kernel_mu, self.Output.kernel_rho
             pw += self.log_prior(weights_3)
             qw += self.log_posterior(weights_3, kernel_mu, kernel_rho)
+
+            # print(weights_1, weights_2, weights_3)
 
             outputs = self.run(inputs, weights_1, weights_2, weights_3)
             outputs_list.append(outputs)

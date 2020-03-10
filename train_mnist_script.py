@@ -15,8 +15,6 @@ cache_result: bool
       to save processing time and computation power.
 use_cache: bool
       Set 1 is cached pre-processed data is to be used.
-weight_file: str
-      The file where weights are to be saved.
 """
 from train.bnn_mnist import train
 import sys

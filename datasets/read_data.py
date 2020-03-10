@@ -27,7 +27,7 @@ def read_idx(filename, flatten=True, normalize=True, show_logs=True,
                     print("Normalized %s-th data"%(i+1))
                 for j in range(ret_val.shape[1]):
                     for k in range(ret_val.shape[2]):
-                        mat[j][k] = ret_val[i][j][k]/255.
+                        mat[j][k] = ret_val[i][j][k]/126.
                 normalize_val.append(mat)
                 del mat
             ret_val = np.asarray(normalize_val, dtype=np.float64)
